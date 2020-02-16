@@ -1,5 +1,6 @@
 const { Router } = require("express");
-const middlewares = require("../middlewares");
+// const middlewares = require("../middlewares");
++const { validator } = require("../middlewares");
 const MedicineServices = require("../../services/medicineServices");
 
 const route = Router();
@@ -12,8 +13,11 @@ const medicineRoute = app => {
   route.post("/save", async (req, res, next) => {
     const medicineInput = { ...req.body };
     MedicineServicesInstance.createMedicine(medicineInput)
-      .then(data => console.log(data, "\n medicine saved in database"))
-      .catch(err => console.log(err, "lerrrrrrrrrrrrrrr"));
+    // FIXME: added a response on send, not only a console.log
+      .then(data => { res.json(data);
+        console.log(data, "\n medicine saved in database") })
+      .catch(err => { res.send({err});
+      console.log(err, "lerrrrrrrrrrrrrrr") });
     return res.status(200);
   });
 
@@ -25,7 +29,8 @@ const medicineRoute = app => {
       .catch(err => console.log(err, "dddd"));
   });
 
-  route.post("/searchForPharmacyLocation", async (req, res) => {
+  // route.post("/searchForPharmacyLocation", async (req, res) => {
+    route.post("/searchForPharmacyLocation", validator.validateUserCoordinates, async (req, res) => {
     let input = { ...req.body };
     return res.send(
       await MedicineServicesInstance.getMedsLocations(input.query)
